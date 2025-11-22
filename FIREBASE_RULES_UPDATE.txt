@@ -1,0 +1,50 @@
+═══════════════════════════════════════════════════════════════
+  🔥 URGENT: UPDATE FIRESTORE RULES FOR EVENTS
+═══════════════════════════════════════════════════════════════
+
+You're getting a permission error because the "events" collection
+is not included in your Firestore security rules.
+
+═══════════════════════════════════════════════════════════════
+  COPY & PASTE THIS INTO FIREBASE CONSOLE:
+═══════════════════════════════════════════════════════════════
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isAdmin() {
+      return request.auth != null && 
+             request.auth.token.email == 'kernoumehdi17@gmail.com';
+    }
+    
+    // Members collection rules
+    match /members/{memberId} {
+      allow read: if request.auth != null;
+      allow create: if isAdmin();
+      allow update, delete: if isAdmin();
+    }
+    
+    // Events collection rules (NEW - ADD THIS!)
+    match /events/{eventId} {
+      allow read: if request.auth != null;
+      allow create: if isAdmin();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+  }
+}
+
+═══════════════════════════════════════════════════════════════
+  QUICK STEPS:
+═══════════════════════════════════════════════════════════════
+
+1. Go to: https://console.firebase.google.com/
+2. Select project: dvcheck2-e853b
+3. Click: Firestore Database → Rules tab
+4. DELETE all existing rules
+5. PASTE the rules above
+6. Click "Publish"
+7. Refresh your app
+
+═══════════════════════════════════════════════════════════════
+

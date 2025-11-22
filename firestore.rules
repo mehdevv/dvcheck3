@@ -1,0 +1,33 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper function to check if user is admin
+    function isAdmin() {
+      return request.auth != null && 
+             request.auth.token.email == 'kernoumehdi17@gmail.com';
+    }
+    
+    // Helper function to check if user is the member themselves
+    function isMember(memberData) {
+      return request.auth != null && 
+             request.auth.uid == memberData.uid;
+    }
+    
+    // Members collection rules
+    match /members/{memberId} {
+      // Allow read if user is authenticated (admin can see all, members can see their own)
+      allow read: if request.auth != null;
+      
+      // Allow create if user is admin
+      allow create: if isAdmin();
+      
+      // Allow update/delete if user is admin
+      allow update, delete: if isAdmin();
+    }
+    
+    // Default: deny all other access
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

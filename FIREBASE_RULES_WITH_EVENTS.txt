@@ -1,0 +1,74 @@
+═══════════════════════════════════════════════════════════════
+  🔥 FIREBASE FIRESTORE RULES - WITH EVENTS SUPPORT
+═══════════════════════════════════════════════════════════════
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isAdmin() {
+      return request.auth != null && 
+             request.auth.token.email == 'kernoumehdi17@gmail.com';
+    }
+    
+    // Members collection rules
+    match /members/{memberId} {
+      allow read: if request.auth != null;
+      allow create: if isAdmin();
+      allow update, delete: if isAdmin();
+    }
+    
+    // Events collection rules
+    match /events/{eventId} {
+      allow read: if request.auth != null;
+      allow create: if isAdmin();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+  }
+}
+
+═══════════════════════════════════════════════════════════════
+  📋 STEP-BY-STEP INSTRUCTIONS
+═══════════════════════════════════════════════════════════════
+
+STEP 1: Open Firebase Console
+   → Go to: https://console.firebase.google.com/
+
+STEP 2: Select Your Project
+   → Click on: "dvcheck2-e853b"
+
+STEP 3: Open Firestore Database
+   → In the left sidebar, click: "Firestore Database"
+   → (It's under "Build" section)
+
+STEP 4: Go to Rules Tab
+   → Click the "Rules" tab at the top of the page
+
+STEP 5: Delete Old Rules
+   → Select ALL existing text in the editor
+   → Press DELETE or BACKSPACE
+
+STEP 6: Paste New Rules
+   → Copy the rules from above (the code block)
+   → Paste into the editor
+
+STEP 7: Publish Rules
+   → Click the "Publish" button (top right, blue button)
+   → Wait for "Rules published successfully" message
+
+STEP 8: Refresh Your App
+   → Press Ctrl+Shift+R (Windows) or Cmd+Shift+R (Mac)
+   → Or close and reopen your browser tab
+
+═══════════════════════════════════════════════════════════════
+  ✅ VERIFICATION
+═══════════════════════════════════════════════════════════════
+
+After updating rules:
+1. You should be able to create events
+2. You should be able to scan QR codes
+3. Members should be added to events when scanned
+4. No more "permission-denied" errors for events
+
+═══════════════════════════════════════════════════════════════
+
