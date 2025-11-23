@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Html5Qrcode } from 'html5-qrcode';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiArrowLeft, FiPlus, FiTrash2, FiCamera, FiX, FiCalendar, FiMapPin, FiUsers, FiAlertCircle, FiCheckCircle } from 'react-icons/fi';
+import { FiArrowLeft, FiPlus, FiTrash2, FiCamera, FiX, FiCalendar, FiMapPin, FiUsers, FiAlertCircle, FiCheckCircle, FiEye, FiSearch } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
 import { 
   collection, 
@@ -30,6 +30,8 @@ const EventsManagement = () => {
   const [scanError, setScanError] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showAttendees, setShowAttendees] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
   const html5QrCodeRef = useRef(null);
   const qrReaderElementId = "qr-reader";
 
@@ -427,17 +429,15 @@ const EventsManagement = () => {
               <FiArrowLeft size={18} />
               <span className="btn-text">Back</span>
             </button>
-            <h1 className="events-header-title">Events Management</h1>
+            <div className="events-header-title-wrapper">
+              <img 
+                src="/DVscan.png" 
+                alt="DVcheck Logo" 
+                className="events-header-logo"
+              />
+              <h1 className="events-header-title">Events Management</h1>
+            </div>
           </div>
-          <MotionButton
-            className="events-create-btn"
-            onClick={() => setShowAddEventForm(!showAddEventForm)}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-          >
-            <FiPlus size={18} />
-            <span className="btn-text">{showAddEventForm ? 'Cancel' : 'Create Event'}</span>
-          </MotionButton>
         </div>
       </header>
 
@@ -528,9 +528,36 @@ const EventsManagement = () => {
           {/* Events List */}
           <div>
             <div className="events-section-header">
-              <h2 className="events-section-title">All Events</h2>
-              <span className="events-badge">{events.length}</span>
+              <div className="events-section-title-wrapper">
+                <h2 className="events-section-title">All Events</h2>
+                <span className="events-badge">{events.length}</span>
+              </div>
+              <MotionButton
+                className="events-create-btn"
+                onClick={() => setShowAddEventForm(!showAddEventForm)}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <FiPlus size={18} />
+                <span className="btn-text">{showAddEventForm ? 'Cancel' : 'Create Event'}</span>
+              </MotionButton>
             </div>
+
+            {/* Search Bar */}
+            {events.length > 0 && (
+              <div className="events-search-container">
+                <div className="events-search-wrapper">
+                  <FiSearch size={18} className="events-search-icon" />
+                  <input
+                    type="text"
+                    className="events-search-input"
+                    placeholder="Search events by name, location, or description..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                </div>
+              </div>
+            )}
 
             {events.length === 0 ? (
               <div className="events-card">
@@ -539,9 +566,27 @@ const EventsManagement = () => {
                   <p className="events-empty-state-text">No events created yet.</p>
                 </div>
               </div>
-            ) : (
-              <div className="events-grid">
-                {events.map((event) => (
+            ) : (() => {
+              const filteredEvents = events.filter(event => {
+                if (!searchQuery.trim()) return true;
+                const query = searchQuery.toLowerCase();
+                return (
+                  event.name?.toLowerCase().includes(query) ||
+                  event.location?.toLowerCase().includes(query) ||
+                  event.description?.toLowerCase().includes(query)
+                );
+              });
+
+              return filteredEvents.length === 0 ? (
+                <div className="events-card">
+                  <div className="events-empty-state">
+                    <FiSearch size={48} className="events-empty-state-icon" />
+                    <p className="events-empty-state-text">No events found matching your search.</p>
+                  </div>
+                </div>
+              ) : (
+                <div className="events-grid">
+                  {filteredEvents.map((event) => (
                   <div key={event.id} className="event-card">
                     <div className="event-header">
                       <h3 className="event-title">{event.name}</h3>
@@ -590,55 +635,35 @@ const EventsManagement = () => {
                       </div>
                     </div>
 
-                    <MotionButton
-                      className="event-scan-btn"
-                      onClick={() => startScanning(event.id)}
-                      disabled={isScanning}
-                      whileHover={{ scale: isScanning ? 1 : 1.02 }}
-                      whileTap={{ scale: isScanning ? 1 : 0.98 }}
-                    >
-                      <FiCamera size={18} />
-                      Scan QR Code
-                    </MotionButton>
+                    <div className="event-actions">
+                      <MotionButton
+                        className="event-scan-btn"
+                        onClick={() => startScanning(event.id)}
+                        disabled={isScanning}
+                        whileHover={{ scale: isScanning ? 1 : 1.02 }}
+                        whileTap={{ scale: isScanning ? 1 : 0.98 }}
+                      >
+                        <FiCamera size={18} />
+                        Scan QR Code
+                      </MotionButton>
 
-                    {event.attendees && event.attendees.length > 0 && (
-                      <>
-                        <hr className="event-divider" />
-                        <div className="attendees-section">
-                          <h4 className="attendees-title">
-                            Attendees ({event.attendees.length})
-                          </h4>
-                          <div className="attendees-list">
-                            {event.attendees.map((attendee, idx) => (
-                              <div key={idx} className="attendee-item">
-                                <div className="attendee-info">
-                                  <span className="attendee-name">
-                                    {attendee.name}
-                                  </span>
-                                  <span className="attendee-email">
-                                    {attendee.email}
-                                  </span>
-                                  <span className="attendee-time">
-                                    {new Date(attendee.checkedInAt).toLocaleString()}
-                                  </span>
-                                </div>
-                                <button
-                                  className="attendee-remove-btn"
-                                  onClick={() => removeAttendee(event.id, attendee.email)}
-                                  aria-label="Remove attendee"
-                                >
-                                  <FiTrash2 size={18} />
-                                </button>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      </>
-                    )}
+                      {event.attendees && event.attendees.length > 0 && (
+                        <MotionButton
+                          className="event-view-attendees-btn"
+                          onClick={() => setShowAttendees(event.id)}
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                        >
+                          <FiEye size={18} />
+                          View Attendees ({event.attendees.length})
+                        </MotionButton>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>
-            )}
+              );
+            })()}
           </div>
         </div>
       </div>
@@ -680,6 +705,64 @@ const EventsManagement = () => {
           </div>
         </div>
       )}
+
+      {/* Attendees Modal */}
+      {showAttendees && (() => {
+        const event = events.find(e => e.id === showAttendees);
+        if (!event || !event.attendees || event.attendees.length === 0) return null;
+        
+        return (
+          <div className="modal-overlay" onClick={() => setShowAttendees(null)}>
+            <div className="modal-content events-attendees-modal" onClick={(e) => e.stopPropagation()}>
+              <div className="events-modal-header">
+                <h2 className="events-modal-title">
+                  Attendees - {event.name}
+                </h2>
+                <button
+                  className="events-modal-close-btn"
+                  onClick={() => setShowAttendees(null)}
+                  aria-label="Close attendees"
+                >
+                  <FiX size={24} />
+                </button>
+              </div>
+              <div className="events-modal-body">
+                <div className="attendees-section">
+                  <div className="attendees-list">
+                    {event.attendees.map((attendee, idx) => (
+                      <div key={idx} className="attendee-item">
+                        <div className="attendee-info">
+                          <span className="attendee-name">
+                            {attendee.name}
+                          </span>
+                          <span className="attendee-email">
+                            {attendee.email}
+                          </span>
+                          <span className="attendee-time">
+                            Checked in: {new Date(attendee.checkedInAt).toLocaleString()}
+                          </span>
+                        </div>
+                        <button
+                          className="attendee-remove-btn"
+                          onClick={() => {
+                            removeAttendee(event.id, attendee.email);
+                            if (event.attendees.length === 1) {
+                              setShowAttendees(null);
+                            }
+                          }}
+                          aria-label="Remove attendee"
+                        >
+                          <FiTrash2 size={18} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 };

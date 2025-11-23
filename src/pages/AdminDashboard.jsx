@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiPlus, FiUpload, FiEdit2, FiTrash2, FiLogOut, FiCalendar, FiUser, FiAlertCircle } from 'react-icons/fi';
+import { FiPlus, FiUpload, FiEdit2, FiTrash2, FiLogOut, FiCalendar, FiUser, FiAlertCircle, FiSearch } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
 import ExcelUploadModal from '../components/ExcelUploadModal';
 import './AdminDashboard.css';
@@ -17,6 +17,7 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [isExcelOpen, setIsExcelOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -107,7 +108,14 @@ const AdminDashboard = () => {
       {/* Header */}
       <header className="admin-dashboard-header">
         <div className="admin-header-content">
-          <h1 className="admin-dashboard-title">DVcheck</h1>
+          <div className="admin-dashboard-title-wrapper">
+            <img 
+              src="/DVscan.png" 
+              alt="DVcheck Logo" 
+              className="admin-dashboard-logo"
+            />
+            <h1 className="admin-dashboard-title">DVcheck</h1>
+          </div>
           <div className="admin-header-actions">
             <button
               className="admin-header-btn"
@@ -269,26 +277,58 @@ const AdminDashboard = () => {
               <span className="admin-badge">{members.length}</span>
             </div>
 
+            {/* Search Bar */}
+            {members.length > 0 && (
+              <div className="admin-search-container">
+                <div className="admin-search-wrapper">
+                  <FiSearch size={18} className="admin-search-icon" />
+                  <input
+                    type="text"
+                    className="admin-search-input"
+                    placeholder="Search members by name, email, or phone..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                </div>
+              </div>
+            )}
+
             {members.length === 0 ? (
               <div className="admin-empty-state">
                 <FiUser size={48} className="admin-empty-state-icon" />
                 <p className="admin-empty-state-text">No members added yet.</p>
               </div>
-            ) : (
-              <div className="admin-table-container">
-                <table className="admin-table">
-                  <thead>
-                    <tr>
-                      <th>Name</th>
-                      <th>Email</th>
-                      <th>Phone</th>
-                      <th>Password</th>
-                      <th>Created</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {members.map((member) => (
+            ) : (() => {
+              const filteredMembers = members.filter(member => {
+                if (!searchQuery.trim()) return true;
+                const query = searchQuery.toLowerCase();
+                return (
+                  member.name?.toLowerCase().includes(query) ||
+                  member.email?.toLowerCase().includes(query) ||
+                  member.phone?.toLowerCase().includes(query)
+                );
+              });
+
+              return filteredMembers.length === 0 ? (
+                <div className="admin-empty-state">
+                  <FiSearch size={48} className="admin-empty-state-icon" />
+                  <p className="admin-empty-state-text">No members found matching your search.</p>
+                </div>
+              ) : (
+                <div className="admin-table-container">
+                  <table className="admin-table">
+                    <thead>
+                      <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Password</th>
+                        <th>Created</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredMembers.map((member) => (
                       <tr key={member.id}>
                         <td style={{ fontWeight: 500 }}>{member.name}</td>
                         <td style={{ color: '#6b7280' }}>{member.email}</td>
@@ -320,11 +360,12 @@ const AdminDashboard = () => {
                           </div>
                         </td>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              );
+            })()}
           </div>
         </div>
       </div>

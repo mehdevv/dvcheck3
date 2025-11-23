@@ -126,6 +126,28 @@
   background: rgba(37, 99, 235, 0.08);
 }
 
+.events-header-title-wrapper {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  flex: 1;
+  min-width: 0;
+}
+
+.events-header-logo {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+@media (min-width: 768px) {
+  .events-header-logo {
+    width: 36px;
+    height: 36px;
+  }
+}
+
 .events-header-title {
   font-size: clamp(1.25rem, 4vw, 1.5rem);
   font-weight: 500;
@@ -197,8 +219,24 @@
   display: flex;
   flex-direction: row;
   align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+  flex-wrap: wrap;
+}
+
+@media (min-width: 480px) {
+  .events-section-header {
+    flex-wrap: nowrap;
+  }
+}
+
+.events-section-title-wrapper {
+  display: flex;
+  align-items: center;
   gap: var(--spacing-sm);
-  margin-bottom: var(--spacing-lg);
+  flex: 1;
+  min-width: 0;
 }
 
 .events-section-title {
@@ -219,6 +257,48 @@
   color: #2563eb; /* blue-600 */
   white-space: nowrap;
   flex-shrink: 0;
+}
+
+/* Search Bar */
+.events-search-container {
+  margin-bottom: var(--spacing-lg);
+}
+
+.events-search-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.events-search-icon {
+  position: absolute;
+  left: var(--spacing-md);
+  color: #9ca3af; /* gray-400 */
+  pointer-events: none;
+  z-index: 1;
+}
+
+.events-search-input {
+  width: 100%;
+  padding: 14px 16px 14px 48px;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  background: #ffffff;
+  font-size: var(--font-size-base);
+  color: #000;
+  transition: all 0.15s ease;
+  min-height: 52px;
+  box-sizing: border-box;
+}
+
+.events-search-input:focus {
+  outline: none;
+  border-color: #2563eb; /* blue-600 */
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.events-search-input::placeholder {
+  color: #9ca3af; /* gray-400 */
 }
 
 @media (min-width: 768px) {
@@ -530,9 +610,21 @@
   }
 }
 
-.event-scan-btn {
-  width: 100%;
+.event-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
   margin-top: var(--spacing-md);
+}
+
+@media (min-width: 480px) {
+  .event-actions {
+    flex-direction: row;
+  }
+}
+
+.event-scan-btn {
+  flex: 1;
   padding: 14px 24px;
   border-radius: 12px;
   border: none;
@@ -558,6 +650,31 @@
 .event-scan-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+.event-view-attendees-btn {
+  flex: 1;
+  padding: 14px 24px;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  background: #ffffff;
+  color: #2563eb; /* blue-600 */
+  font-size: var(--font-size-base);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xs);
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  min-height: 52px;
+}
+
+.event-view-attendees-btn:hover {
+  background: rgba(37, 99, 235, 0.08);
+  border-color: #2563eb;
 }
 
 .event-divider {
@@ -642,18 +759,25 @@
   font-size: var(--font-size-sm);
   font-weight: 600;
   color: #000;
-  word-break: break-word;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .attendee-email {
   font-size: var(--font-size-xs);
   color: #6b7280; /* gray-500 */
-  word-break: break-all;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .attendee-time {
   font-size: var(--font-size-xs);
   color: #9ca3af; /* gray-400 */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .attendee-remove-btn {
@@ -855,5 +979,24 @@
 
 .events-stop-btn:hover {
   background: #dc2626; /* red-600 */
+}
+
+/* Attendees Modal */
+.events-attendees-modal {
+  max-width: 600px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.events-attendees-modal .attendees-section {
+  margin-top: 0;
+}
+
+.events-attendees-modal .attendees-list {
+  max-height: 60vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 

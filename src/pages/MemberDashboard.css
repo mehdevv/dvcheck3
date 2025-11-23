@@ -48,6 +48,26 @@
   }
 }
 
+.member-dashboard-title-wrapper {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.member-dashboard-logo {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+@media (min-width: 768px) {
+  .member-dashboard-logo {
+    width: 36px;
+    height: 36px;
+  }
+}
+
 .member-dashboard-title {
   font-size: clamp(1.25rem, 4vw, 1.5rem);
   font-weight: 500;

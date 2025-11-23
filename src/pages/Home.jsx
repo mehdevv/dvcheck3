@@ -20,28 +20,31 @@ const Home = () => {
             <MotionDiv
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              style={{ marginBottom: 'var(--spacing-lg)' }}
             >
-              <h1 className="home-title">
-                Member Management
-                <span className="home-title-accent">Platform</span>
-              </h1>
+              <img 
+                src="/DVscan.png" 
+                alt="DVcheck Logo" 
+                className="home-logo"
+              />
             </MotionDiv>
 
             <MotionDiv
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              style={{ marginBottom: 'var(--spacing-2xl)' }}
             >
-              <p className="home-subtitle">
-                Welcome to the Member Management System
+              <p className="home-tagline">
+                from Digital valley for Digital valley
               </p>
             </MotionDiv>
 
             <MotionDiv
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.6 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
               className="home-buttons"
             >
               <Link to="/admin/login" className="btn btn-primary home-button">

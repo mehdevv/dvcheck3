@@ -14,7 +14,14 @@ const MemberDashboard = () => {
       <div className="member-dashboard-container">
         {/* Header */}
         <div className="member-dashboard-header">
-          <h1 className="member-dashboard-title">DVcheck</h1>
+          <div className="member-dashboard-title-wrapper">
+            <img 
+              src="/DVscan.png" 
+              alt="DVcheck Logo" 
+              className="member-dashboard-logo"
+            />
+            <h1 className="member-dashboard-title">DVcheck</h1>
+          </div>
           <button
             className="member-dashboard-logout-btn"
             onClick={logout}
