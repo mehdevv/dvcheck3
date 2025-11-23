@@ -1,17 +1,22 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { FiPlus, FiUpload, FiEdit2, FiTrash2, FiLogOut, FiCalendar, FiUser, FiAlertCircle } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
 import ExcelUploadModal from '../components/ExcelUploadModal';
-import './Dashboard.css';
+import './AdminDashboard.css';
+
+const MotionDiv = motion.div;
+const MotionButton = motion.button;
 
 const AdminDashboard = () => {
   const { user, members, addMember, updateMember, deleteMember, logout } = useAuth();
   const navigate = useNavigate();
   const [showAddForm, setShowAddForm] = useState(false);
-  const [showExcelModal, setShowExcelModal] = useState(false);
   const [editingMember, setEditingMember] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [isExcelOpen, setIsExcelOpen] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -50,7 +55,7 @@ const AdminDashboard = () => {
     setFormData({
       name: member.name || '',
       email: member.email || '',
-      password: '', // Don't show existing password
+      password: '',
       phone: member.phone || '',
     });
     setShowAddForm(false);
@@ -98,181 +103,229 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div className="dashboard-container">
-      <div className="dashboard-header">
-        <h1>Admin Dashboard</h1>
-        <div className="user-info">
-          <button
-            onClick={() => navigate('/admin/events')}
-            className="events-button"
-          >
-            📅 Events Management
-          </button>
-          <span>Welcome, {user?.email}</span>
-          <button onClick={logout} className="logout-button">Logout</button>
-        </div>
-      </div>
-
-      <div className="dashboard-content">
-        <div className="section-header">
-          <h2>Members Management</h2>
-          <div style={{ display: 'flex', gap: '12px' }}>
+    <div className="admin-dashboard-page">
+      {/* Header */}
+      <header className="admin-dashboard-header">
+        <div className="admin-header-content">
+          <h1 className="admin-dashboard-title">DVcheck</h1>
+          <div className="admin-header-actions">
             <button
-              onClick={() => setShowExcelModal(true)}
-              className="excel-upload-button"
+              className="admin-header-btn"
+              onClick={() => navigate('/admin/events')}
+              aria-label="Events"
             >
-              📊 Upload Excel
+              <FiCalendar size={18} />
+              <span className="btn-text">Events</span>
             </button>
+            <span className="admin-user-email">{user?.email}</span>
             <button
-              onClick={() => setShowAddForm(!showAddForm)}
-              className="add-button"
+              className="admin-logout-btn"
+              onClick={logout}
+              aria-label="Logout"
             >
-              {showAddForm ? 'Cancel' : '+ Add Member'}
+              <FiLogOut size={20} />
             </button>
           </div>
         </div>
+      </header>
 
-        <ExcelUploadModal 
-          isOpen={showExcelModal} 
-          onClose={() => setShowExcelModal(false)} 
-        />
-
-        {error && (
-          <div className="error-message" style={{ marginBottom: '20px' }}>
-            {error}
+      <div className="admin-dashboard-container">
+        <div className="admin-dashboard-content">
+          {/* Section Header */}
+          <div className="admin-section-header">
+            <h2 className="admin-section-title">Members Management</h2>
+            <div className="admin-section-actions">
+              <MotionButton
+                className="admin-section-btn admin-section-btn-ghost"
+                onClick={() => setIsExcelOpen(true)}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <FiUpload size={18} />
+                <span className="btn-text">Upload Excel</span>
+              </MotionButton>
+              <MotionButton
+                className="admin-section-btn admin-section-btn-primary"
+                onClick={() => {
+                  setShowAddForm(!showAddForm);
+                  setEditingMember(null);
+                  setFormData({ name: '', email: '', password: '', phone: '' });
+                }}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <FiPlus size={18} />
+                <span className="btn-text">{showAddForm ? 'Cancel' : 'Add Member'}</span>
+              </MotionButton>
+            </div>
           </div>
-        )}
 
-        {(showAddForm || editingMember) && (
-          <div className="add-member-form">
-            <h3>{editingMember ? 'Edit Member' : 'Add New Member'}</h3>
-            <form onSubmit={editingMember ? handleUpdateMember : handleAddMember}>
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Name *</label>
-                  <input
-                    type="text"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleInputChange}
-                    required
-                    placeholder="Member name"
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Email *</label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    required
-                    placeholder="Member email"
-                  />
-                </div>
-              </div>
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Password {editingMember ? '(leave blank to keep current)' : '*'}</label>
-                  <input
-                    type="password"
-                    name="password"
-                    value={formData.password}
-                    onChange={handleInputChange}
-                    required={!editingMember}
-                    placeholder={editingMember ? "New password (optional)" : "Member password"}
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Phone</label>
-                  <input
-                    type="tel"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleInputChange}
-                    placeholder="Phone number (optional)"
-                  />
-                </div>
-              </div>
-              <div style={{ display: 'flex', gap: '12px' }}>
-                <button type="submit" className="submit-button" disabled={loading}>
-                  {loading 
-                    ? (editingMember ? 'Updating...' : 'Adding...') 
-                    : (editingMember ? 'Update Member' : 'Add Member')
-                  }
-                </button>
-                {editingMember && (
-                  <button 
-                    type="button" 
-                    onClick={handleCancelEdit}
-                    className="cancel-button"
-                    disabled={loading}
-                  >
-                    Cancel
-                  </button>
-                )}
-              </div>
-            </form>
-          </div>
-        )}
+          <ExcelUploadModal isOpen={isExcelOpen} onClose={() => setIsExcelOpen(false)} />
 
-        <div className="members-list">
-          <h3>All Members ({members.length})</h3>
-          {members.length === 0 ? (
-            <p className="empty-message">No members added yet.</p>
-          ) : (
-            <div className="members-table">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Phone</th>
-                    <th>Password</th>
-                    <th>Created</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {members.map((member) => (
-                    <tr key={member.id}>
-                      <td>{member.name}</td>
-                      <td>{member.email}</td>
-                      <td>{member.phone || 'N/A'}</td>
-                      <td>
-                        <span style={{ 
-                          fontFamily: 'monospace', 
-                          fontSize: '12px',
-                          color: '#6e6e73'
-                        }}>
-                          {member.password ? '••••••••' : 'N/A'}
-                        </span>
-                      </td>
-                      <td>
-                        {new Date(member.createdAt).toLocaleDateString()}
-                      </td>
-                      <td>
-                        <div style={{ display: 'flex', gap: '8px' }}>
-                          <button
-                            onClick={() => handleEdit(member)}
-                            className="edit-button"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            onClick={() => handleDelete(member.id)}
-                            className="delete-button"
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+          {error && (
+            <div className="admin-alert admin-alert-error">
+              <FiAlertCircle size={18} />
+              {error}
             </div>
           )}
+
+          {/* Add/Edit Form */}
+          <AnimatePresence>
+            {(showAddForm || editingMember) && (
+              <MotionDiv
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="admin-card"
+              >
+                <h3 className="admin-card-title">
+                  {editingMember ? 'Edit Member' : 'Add New Member'}
+                </h3>
+                <form onSubmit={editingMember ? handleUpdateMember : handleAddMember}>
+                  <div className="admin-form-grid">
+                    <div className="admin-form-group">
+                      <label className="admin-form-label">Name *</label>
+                      <input
+                        type="text"
+                        name="name"
+                        className="admin-form-input"
+                        value={formData.name}
+                        onChange={handleInputChange}
+                        placeholder="Member name"
+                        required
+                      />
+                    </div>
+                    <div className="admin-form-group">
+                      <label className="admin-form-label">Email *</label>
+                      <input
+                        type="email"
+                        name="email"
+                        className="admin-form-input"
+                        value={formData.email}
+                        onChange={handleInputChange}
+                        placeholder="Member email"
+                        required
+                      />
+                    </div>
+                    <div className="admin-form-group">
+                      <label className="admin-form-label">
+                        Password {editingMember ? '(optional)' : '*'}
+                      </label>
+                      <input
+                        type="password"
+                        name="password"
+                        className="admin-form-input"
+                        value={formData.password}
+                        onChange={handleInputChange}
+                        placeholder={editingMember ? "New password (optional)" : "Member password"}
+                        required={!editingMember}
+                      />
+                    </div>
+                    <div className="admin-form-group">
+                      <label className="admin-form-label">Phone</label>
+                      <input
+                        type="tel"
+                        name="phone"
+                        className="admin-form-input"
+                        value={formData.phone}
+                        onChange={handleInputChange}
+                        placeholder="Phone number (optional)"
+                      />
+                    </div>
+                  </div>
+                  <div className="admin-form-actions">
+                    <MotionButton
+                      type="submit"
+                      className="admin-section-btn admin-section-btn-primary"
+                      disabled={loading}
+                      whileHover={{ scale: loading ? 1 : 1.02 }}
+                      whileTap={{ scale: loading ? 1 : 0.98 }}
+                    >
+                      {loading
+                        ? (editingMember ? 'Updating...' : 'Adding...')
+                        : (editingMember ? 'Update Member' : 'Add Member')
+                      }
+                    </MotionButton>
+                    {editingMember && (
+                      <button
+                        type="button"
+                        className="admin-section-btn admin-section-btn-ghost"
+                        onClick={handleCancelEdit}
+                        disabled={loading}
+                      >
+                        Cancel
+                      </button>
+                    )}
+                  </div>
+                </form>
+              </MotionDiv>
+            )}
+          </AnimatePresence>
+
+          {/* Members List */}
+          <div className="admin-card">
+            <div className="admin-card-header">
+              <h3 className="admin-card-title">All Members</h3>
+              <span className="admin-badge">{members.length}</span>
+            </div>
+
+            {members.length === 0 ? (
+              <div className="admin-empty-state">
+                <FiUser size={48} className="admin-empty-state-icon" />
+                <p className="admin-empty-state-text">No members added yet.</p>
+              </div>
+            ) : (
+              <div className="admin-table-container">
+                <table className="admin-table">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Email</th>
+                      <th>Phone</th>
+                      <th>Password</th>
+                      <th>Created</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {members.map((member) => (
+                      <tr key={member.id}>
+                        <td style={{ fontWeight: 500 }}>{member.name}</td>
+                        <td style={{ color: '#6b7280' }}>{member.email}</td>
+                        <td style={{ color: '#6b7280' }}>{member.phone || 'N/A'}</td>
+                        <td>
+                          <span style={{ fontFamily: 'monospace', fontSize: 'var(--font-size-xs)', color: '#9ca3af' }}>
+                            {member.password ? '••••••••' : 'N/A'}
+                          </span>
+                        </td>
+                        <td style={{ color: '#6b7280', fontSize: 'var(--font-size-sm)' }}>
+                          {new Date(member.createdAt).toLocaleDateString()}
+                        </td>
+                        <td>
+                          <div className="admin-action-buttons">
+                            <button
+                              className="admin-icon-btn"
+                              onClick={() => handleEdit(member)}
+                              aria-label="Edit member"
+                            >
+                              <FiEdit2 size={18} />
+                            </button>
+                            <button
+                              className="admin-icon-btn admin-icon-btn-danger"
+                              onClick={() => handleDelete(member.id)}
+                              aria-label="Delete member"
+                            >
+                              <FiTrash2 size={18} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
@@ -280,4 +333,3 @@ const AdminDashboard = () => {
 };
 
 export default AdminDashboard;
-

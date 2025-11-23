@@ -1,62 +1,37 @@
 .qr-code-container {
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  padding: 32px 24px;
-  border-radius: 20px;
-  box-shadow: 0 8px 32px rgba(0, 122, 255, 0.08),
-              0 2px 8px rgba(0, 0, 0, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.6);
-  text-align: center;
   display: flex;
   justify-content: center;
   align-items: center;
   width: 100%;
 }
 
-@media (min-width: 480px) {
-  .qr-code-container {
-    padding: 40px;
+.qr-code-card {
+  padding: var(--spacing-xl);
+  box-shadow: var(--shadow-lg);
+}
+
+@media (min-width: 768px) {
+  .qr-code-card {
+    padding: var(--spacing-2xl);
   }
 }
 
 .qr-code-wrapper {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.qr-code-background {
-  padding: 20px;
   background: white;
-  border-radius: 16px;
-  box-shadow: 0 4px 16px rgba(0, 122, 255, 0.1);
+  padding: var(--spacing-md);
+  border-radius: var(--radius-lg);
   display: inline-block;
-  max-width: 100%;
-}
-
-.qr-code-background svg {
-  width: 200px !important;
-  height: 200px !important;
-  max-width: 100%;
-  height: auto;
-}
-
-@media (min-width: 480px) {
-  .qr-code-background {
-    padding: 24px;
-  }
-
-  .qr-code-background svg {
-    width: 250px !important;
-    height: 250px !important;
-  }
 }
 
 @media (min-width: 768px) {
-  .qr-code-background svg {
-    width: 300px !important;
-    height: 300px !important;
+  .qr-code-wrapper {
+    padding: var(--spacing-lg);
   }
 }
 
+@media (max-width: 768px) {
+  .qr-code-wrapper svg {
+    width: 200px !important;
+    height: 200px !important;
+  }
+}

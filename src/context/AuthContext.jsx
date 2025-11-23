@@ -214,6 +214,12 @@ export const AuthProvider = ({ children }) => {
       
       const uid = userCredential.user.uid;
 
+      // Sign out the newly created user immediately
+      await firebaseSignOut(auth);
+      
+      // Re-authenticate as admin BEFORE adding to Firestore
+      await signInWithEmailAndPassword(auth, adminEmail, adminPassword);
+
       // Generate QR code data (JSON string with name and email)
       const qrCodeData = JSON.stringify({
         name: memberData.name,
@@ -222,7 +228,7 @@ export const AuthProvider = ({ children }) => {
         memberId: uid
       });
 
-      // Add member data to Firestore (including password and QR code data)
+      // Add member data to Firestore (now authenticated as admin)
       const memberDoc = {
         name: memberData.name,
         email: memberData.email,
@@ -234,12 +240,6 @@ export const AuthProvider = ({ children }) => {
       };
 
       const docRef = await addDoc(collection(db, 'members'), memberDoc);
-      
-      // Sign out the newly created user
-      await firebaseSignOut(auth);
-      
-      // Re-authenticate as admin
-      await signInWithEmailAndPassword(auth, adminEmail, adminPassword);
 
       return { id: docRef.id, ...memberDoc };
     } catch (error) {

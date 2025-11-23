@@ -1,21 +1,24 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Html5Qrcode } from 'html5-qrcode';
+import { motion, AnimatePresence } from 'framer-motion';
+import { FiArrowLeft, FiPlus, FiTrash2, FiCamera, FiX, FiCalendar, FiMapPin, FiUsers, FiAlertCircle, FiCheckCircle } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
 import { 
   collection, 
   addDoc, 
-  getDocs, 
   updateDoc,
   deleteDoc,
   doc,
   query, 
   orderBy,
   onSnapshot,
-  where
 } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import './EventsManagement.css';
+
+const MotionDiv = motion.div;
+const MotionButton = motion.button;
 
 const EventsManagement = () => {
   const { user, members } = useAuth();
@@ -27,7 +30,6 @@ const EventsManagement = () => {
   const [scanError, setScanError] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const scannerRef = useRef(null);
   const html5QrCodeRef = useRef(null);
   const qrReaderElementId = "qr-reader";
 
@@ -38,31 +40,27 @@ const EventsManagement = () => {
     location: '',
   });
 
-  // Define handleQRCodeScanned first using useCallback
   const handleQRCodeScanned = useCallback(async (qrData, eventId) => {
     try {
-      // Stop scanning temporarily to process
       if (html5QrCodeRef.current) {
         try {
           await html5QrCodeRef.current.pause();
         } catch (e) {
-          // Ignore pause errors - scanner might not be running or already paused
+          // Ignore pause errors
         }
       }
 
-      // Parse QR code data
       let memberData;
       try {
         memberData = JSON.parse(qrData);
       } catch (parseError) {
         setScanError('Invalid QR code format. Please scan a valid member QR code.');
-        // Resume scanning after 2 seconds
         setTimeout(() => {
           if (html5QrCodeRef.current && isScanning) {
             try {
               html5QrCodeRef.current.resume();
             } catch (e) {
-              // Ignore resume errors - scanner might not be paused
+              // Ignore resume errors
             }
           }
         }, 2000);
@@ -76,14 +74,13 @@ const EventsManagement = () => {
             try {
               html5QrCodeRef.current.resume();
             } catch (e) {
-              // Ignore resume errors - scanner might not be paused
+              // Ignore resume errors
             }
           }
         }, 2000);
         return;
       }
 
-      // Find member by email
       const member = members.find(m => m.email === memberData.email);
       if (!member) {
         setScanError(`Member "${memberData.name}" (${memberData.email}) not found in database`);
@@ -92,14 +89,13 @@ const EventsManagement = () => {
             try {
               html5QrCodeRef.current.resume();
             } catch (e) {
-              // Ignore resume errors - scanner might not be paused
+              // Ignore resume errors
             }
           }
         }, 2000);
         return;
       }
 
-      // Get event data
       const event = events.find(e => e.id === eventId);
       if (!event) {
         setScanError('Event not found');
@@ -108,14 +104,13 @@ const EventsManagement = () => {
             try {
               html5QrCodeRef.current.resume();
             } catch (e) {
-              // Ignore resume errors - scanner might not be paused
+              // Ignore resume errors
             }
           }
         }, 2000);
         return;
       }
 
-      // Check if member is already checked in
       const isAlreadyCheckedIn = event.attendees?.some(
         attendee => attendee.email === memberData.email || attendee.id === member.id
       );
@@ -124,14 +119,17 @@ const EventsManagement = () => {
         setScanError(`✓ ${memberData.name} is already checked in to this event`);
         setTimeout(() => {
           if (html5QrCodeRef.current && isScanning) {
-            html5QrCodeRef.current.resume();
+            try {
+              html5QrCodeRef.current.resume();
+            } catch (e) {
+              // Ignore resume errors
+            }
           }
           setScanError('');
         }, 2000);
         return;
       }
 
-      // Add member to event attendees
       const updatedAttendees = [
         ...(event.attendees || []),
         {
@@ -146,11 +144,9 @@ const EventsManagement = () => {
         attendees: updatedAttendees
       });
 
-      // Success - show confirmation
       setScanError('');
       const successMessage = `✓ ${memberData.name} checked in successfully!`;
       
-      // Show success message
       const successDiv = document.createElement('div');
       successDiv.style.cssText = `
         position: fixed;
@@ -170,18 +166,16 @@ const EventsManagement = () => {
       successDiv.textContent = successMessage;
       document.body.appendChild(successDiv);
       
-      // Remove success message after 2 seconds
       setTimeout(() => {
         successDiv.remove();
       }, 2000);
       
-      // Resume scanning after brief pause
       setTimeout(() => {
         if (html5QrCodeRef.current && isScanning) {
           try {
             html5QrCodeRef.current.resume();
           } catch (e) {
-            // Ignore resume errors - scanner might not be paused
+            // Ignore resume errors
           }
         }
       }, 1500);
@@ -190,20 +184,18 @@ const EventsManagement = () => {
       console.error('Error processing QR code:', err);
       setScanError(err.message || 'Failed to process QR code');
       
-      // Resume scanning after error
       setTimeout(() => {
         if (html5QrCodeRef.current && isScanning) {
           try {
             html5QrCodeRef.current.resume();
           } catch (e) {
-            // Ignore resume errors - scanner might not be paused
+            // Ignore resume errors
           }
         }
       }, 2000);
     }
   }, [members, events, isScanning]);
 
-  // Load events from Firestore
   useEffect(() => {
     const eventsRef = collection(db, 'events');
     const q = query(eventsRef, orderBy('date', 'desc'));
@@ -222,7 +214,6 @@ const EventsManagement = () => {
     return () => unsubscribe();
   }, []);
 
-  // Initialize scanner when isScanning becomes true
   useEffect(() => {
     if (!isScanning || !selectedEvent) {
       return;
@@ -232,7 +223,6 @@ const EventsManagement = () => {
 
     const initializeScanner = async () => {
       try {
-        // Wait for DOM to render
         await new Promise(resolve => setTimeout(resolve, 200));
 
         if (!isMounted) return;
@@ -246,12 +236,11 @@ const EventsManagement = () => {
           return;
         }
 
-        // Clear any existing scanner
         if (html5QrCodeRef.current) {
           try {
             await html5QrCodeRef.current.stop();
           } catch (e) {
-            // Ignore errors when stopping - scanner might not be running
+            // Ignore errors when stopping
           }
           try {
             html5QrCodeRef.current.clear();
@@ -289,27 +278,22 @@ const EventsManagement = () => {
 
     initializeScanner();
 
-    // Cleanup function
     return () => {
       isMounted = false;
       if (html5QrCodeRef.current) {
-        // Handle paused scanner: resume first, then stop
         const cleanup = async () => {
           try {
-            // If scanner is paused, resume it first
             try {
               await html5QrCodeRef.current.resume();
             } catch (e) {
               // Not paused, continue
             }
             
-            // Now stop the scanner
             await html5QrCodeRef.current.stop();
           } catch (e) {
-            // Scanner might already be stopped, that's okay
+            // Scanner might already be stopped
           }
           
-          // Always clear
           try {
             html5QrCodeRef.current.clear();
           } catch (e) {
@@ -367,28 +351,23 @@ const EventsManagement = () => {
     setSelectedEvent(eventId);
     setIsScanning(true);
     setScanError('');
-    // Scanner will be initialized by useEffect when isScanning becomes true
   };
 
   const stopScanning = () => {
     if (html5QrCodeRef.current) {
-      // Handle paused scanner: resume first, then stop
       const cleanup = async () => {
         try {
-          // If scanner is paused, resume it first
           try {
             await html5QrCodeRef.current.resume();
           } catch (e) {
             // Not paused, continue
           }
           
-          // Now stop the scanner
           await html5QrCodeRef.current.stop();
         } catch (e) {
-          // Scanner might already be stopped, that's okay
+          // Scanner might already be stopped
         }
         
-        // Always clear
         try {
           html5QrCodeRef.current.clear();
         } catch (e) {
@@ -435,192 +414,274 @@ const EventsManagement = () => {
   };
 
   return (
-    <div className="events-container">
-      <div className="events-header">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <button
-            onClick={() => navigate('/admin/dashboard')}
-            className="back-button"
+    <div className="events-page">
+      {/* Header */}
+      <header className="events-header">
+        <div className="events-header-content">
+          <div className="events-header-left">
+            <button
+              className="events-back-btn"
+              onClick={() => navigate('/admin/dashboard')}
+              aria-label="Back to Dashboard"
+            >
+              <FiArrowLeft size={18} />
+              <span className="btn-text">Back</span>
+            </button>
+            <h1 className="events-header-title">Events Management</h1>
+          </div>
+          <MotionButton
+            className="events-create-btn"
+            onClick={() => setShowAddEventForm(!showAddEventForm)}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
           >
-            ← Back
-          </button>
-          <h1>Events Management</h1>
+            <FiPlus size={18} />
+            <span className="btn-text">{showAddEventForm ? 'Cancel' : 'Create Event'}</span>
+          </MotionButton>
         </div>
-        <button
-          onClick={() => setShowAddEventForm(!showAddEventForm)}
-          className="add-event-button"
-        >
-          {showAddEventForm ? 'Cancel' : '+ Create Event'}
-        </button>
-      </div>
+      </header>
 
-      <div className="events-content">
-        {error && (
-          <div className="error-message">{error}</div>
-        )}
-
-        {showAddEventForm && (
-          <div className="add-event-form">
-            <h2>Create New Event</h2>
-            <form onSubmit={handleAddEvent}>
-              <div className="form-group">
-                <label>Event Name *</label>
-                <input
-                  type="text"
-                  name="name"
-                  value={eventFormData.name}
-                  onChange={handleInputChange}
-                  required
-                  placeholder="Enter event name"
-                />
-              </div>
-              <div className="form-group">
-                <label>Description</label>
-                <textarea
-                  name="description"
-                  value={eventFormData.description}
-                  onChange={handleInputChange}
-                  placeholder="Enter event description (optional)"
-                  rows="3"
-                />
-              </div>
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Date *</label>
-                  <input
-                    type="datetime-local"
-                    name="date"
-                    value={eventFormData.date}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Location</label>
-                  <input
-                    type="text"
-                    name="location"
-                    value={eventFormData.location}
-                    onChange={handleInputChange}
-                    placeholder="Event location (optional)"
-                  />
-                </div>
-              </div>
-              <button type="submit" className="submit-button" disabled={loading}>
-                {loading ? 'Creating...' : 'Create Event'}
-              </button>
-            </form>
-          </div>
-        )}
-
-        {isScanning && (
-          <div className="scanner-modal">
-            <div className="scanner-content">
-              <div className="scanner-header">
-                <h2>Scan QR Code</h2>
-                <button onClick={stopScanning} className="close-scanner">×</button>
-              </div>
-              <div id="qr-reader" className="qr-reader"></div>
-              {scanError && (
-                <div className="scan-error">{scanError}</div>
-              )}
-              <p className="scan-instructions">
-                Point your camera at the member's QR code
-              </p>
-              <button 
-                onClick={stopScanning} 
-                className="stop-scanning-button"
-              >
-                Stop Scanning
-              </button>
-            </div>
-          </div>
-        )}
-
-        <div className="events-list">
-          <h2>All Events ({events.length})</h2>
-          {events.length === 0 ? (
-            <p className="empty-message">No events created yet.</p>
-          ) : (
-            <div className="events-grid">
-              {events.map((event) => (
-                <div key={event.id} className="event-card">
-                  <div className="event-header">
-                    <h3>{event.name}</h3>
-                    <button
-                      onClick={() => deleteEvent(event.id)}
-                      className="delete-event-button"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                  
-                  {event.description && (
-                    <p className="event-description">{event.description}</p>
-                  )}
-                  
-                  <div className="event-details">
-                    <div className="event-detail-item">
-                      <span className="detail-label">📅 Date:</span>
-                      <span className="detail-value">
-                        {new Date(event.date).toLocaleString()}
-                      </span>
-                    </div>
-                    {event.location && (
-                      <div className="event-detail-item">
-                        <span className="detail-label">📍 Location:</span>
-                        <span className="detail-value">{event.location}</span>
-                      </div>
-                    )}
-                    <div className="event-detail-item">
-                      <span className="detail-label">👥 Attendees:</span>
-                      <span className="detail-value">
-                        {event.attendees?.length || 0}
-                      </span>
-                    </div>
-                  </div>
-
-                  <button
-                    onClick={() => startScanning(event.id)}
-                    className="scan-button"
-                    disabled={isScanning}
-                  >
-                    📷 Scan QR Code
-                  </button>
-
-                  {event.attendees && event.attendees.length > 0 && (
-                    <div className="attendees-list">
-                      <h4>Attendees ({event.attendees.length})</h4>
-                      <div className="attendees-items">
-                        {event.attendees.map((attendee, idx) => (
-                          <div key={idx} className="attendee-item">
-                            <div className="attendee-info">
-                              <span className="attendee-name">{attendee.name}</span>
-                              <span className="attendee-email">{attendee.email}</span>
-                              <span className="attendee-time">
-                                {new Date(attendee.checkedInAt).toLocaleString()}
-                              </span>
-                            </div>
-                            <button
-                              onClick={() => removeAttendee(event.id, attendee.email)}
-                              className="remove-attendee-button"
-                            >
-                              Remove
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ))}
+      <div className="events-container">
+        <div className="events-content">
+          {error && (
+            <div className="events-alert events-alert-error">
+              <FiAlertCircle size={18} />
+              {error}
             </div>
           )}
+
+          {/* Add Event Form */}
+          <AnimatePresence>
+            {showAddEventForm && (
+              <MotionDiv
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="events-card"
+              >
+                <h2 className="events-card-title">Create New Event</h2>
+                <form onSubmit={handleAddEvent}>
+                  <div className="events-form-group">
+                    <label className="events-form-label">Event Name *</label>
+                    <input
+                      type="text"
+                      name="name"
+                      className="events-form-input"
+                      value={eventFormData.name}
+                      onChange={handleInputChange}
+                      placeholder="Enter event name"
+                      required
+                    />
+                  </div>
+
+                  <div className="events-form-group">
+                    <label className="events-form-label">Description</label>
+                    <textarea
+                      name="description"
+                      className="events-form-textarea"
+                      value={eventFormData.description}
+                      onChange={handleInputChange}
+                      placeholder="Enter event description (optional)"
+                      rows={3}
+                    />
+                  </div>
+
+                  <div className="events-form-grid">
+                    <div className="events-form-group">
+                      <label className="events-form-label">Date *</label>
+                      <input
+                        type="datetime-local"
+                        name="date"
+                        className="events-form-input"
+                        value={eventFormData.date}
+                        onChange={handleInputChange}
+                        required
+                      />
+                    </div>
+                    <div className="events-form-group">
+                      <label className="events-form-label">Location</label>
+                      <input
+                        type="text"
+                        name="location"
+                        className="events-form-input"
+                        value={eventFormData.location}
+                        onChange={handleInputChange}
+                        placeholder="Event location (optional)"
+                      />
+                    </div>
+                  </div>
+
+                  <MotionButton
+                    type="submit"
+                    className="events-form-btn events-form-btn-primary"
+                    disabled={loading}
+                    whileHover={{ scale: loading ? 1 : 1.02 }}
+                    whileTap={{ scale: loading ? 1 : 0.98 }}
+                  >
+                    {loading ? 'Creating...' : 'Create Event'}
+                  </MotionButton>
+                </form>
+              </MotionDiv>
+            )}
+          </AnimatePresence>
+
+          {/* Events List */}
+          <div>
+            <div className="events-section-header">
+              <h2 className="events-section-title">All Events</h2>
+              <span className="events-badge">{events.length}</span>
+            </div>
+
+            {events.length === 0 ? (
+              <div className="events-card">
+                <div className="events-empty-state">
+                  <FiCalendar size={48} className="events-empty-state-icon" />
+                  <p className="events-empty-state-text">No events created yet.</p>
+                </div>
+              </div>
+            ) : (
+              <div className="events-grid">
+                {events.map((event) => (
+                  <div key={event.id} className="event-card">
+                    <div className="event-header">
+                      <h3 className="event-title">{event.name}</h3>
+                      <button
+                        className="event-delete-btn"
+                        onClick={() => deleteEvent(event.id)}
+                        aria-label="Delete event"
+                      >
+                        <FiTrash2 size={18} />
+                      </button>
+                    </div>
+
+                    {event.description && (
+                      <p className="event-description">
+                        {event.description}
+                      </p>
+                    )}
+
+                    <div className="event-details">
+                      <div className="event-detail-item">
+                        <div className="event-detail-label">
+                          <FiCalendar size={16} />
+                          <span>Date</span>
+                        </div>
+                        <span className="event-detail-value">
+                          {new Date(event.date).toLocaleString()}
+                        </span>
+                      </div>
+                      {event.location && (
+                        <div className="event-detail-item">
+                          <div className="event-detail-label">
+                            <FiMapPin size={16} />
+                            <span>Location</span>
+                          </div>
+                          <span className="event-detail-value">
+                            {event.location}
+                          </span>
+                        </div>
+                      )}
+                      <div className="event-detail-item">
+                        <div className="event-detail-label">
+                          <FiUsers size={16} />
+                          <span>Attendees</span>
+                        </div>
+                        <span className="events-badge">{event.attendees?.length || 0}</span>
+                      </div>
+                    </div>
+
+                    <MotionButton
+                      className="event-scan-btn"
+                      onClick={() => startScanning(event.id)}
+                      disabled={isScanning}
+                      whileHover={{ scale: isScanning ? 1 : 1.02 }}
+                      whileTap={{ scale: isScanning ? 1 : 0.98 }}
+                    >
+                      <FiCamera size={18} />
+                      Scan QR Code
+                    </MotionButton>
+
+                    {event.attendees && event.attendees.length > 0 && (
+                      <>
+                        <hr className="event-divider" />
+                        <div className="attendees-section">
+                          <h4 className="attendees-title">
+                            Attendees ({event.attendees.length})
+                          </h4>
+                          <div className="attendees-list">
+                            {event.attendees.map((attendee, idx) => (
+                              <div key={idx} className="attendee-item">
+                                <div className="attendee-info">
+                                  <span className="attendee-name">
+                                    {attendee.name}
+                                  </span>
+                                  <span className="attendee-email">
+                                    {attendee.email}
+                                  </span>
+                                  <span className="attendee-time">
+                                    {new Date(attendee.checkedInAt).toLocaleString()}
+                                  </span>
+                                </div>
+                                <button
+                                  className="attendee-remove-btn"
+                                  onClick={() => removeAttendee(event.id, attendee.email)}
+                                  aria-label="Remove attendee"
+                                >
+                                  <FiTrash2 size={18} />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
+
+      {/* Scanner Modal */}
+      {isScanning && (
+        <div className="modal-overlay" onClick={stopScanning}>
+          <div className="modal-content events-scanner-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="events-modal-header">
+              <h2 className="events-modal-title">Scan QR Code</h2>
+              <button
+                className="events-modal-close-btn"
+                onClick={stopScanning}
+                aria-label="Close scanner"
+              >
+                <FiX size={24} />
+              </button>
+            </div>
+            <div className="events-modal-body">
+              <div id="qr-reader" className="events-qr-reader" />
+              {scanError && (
+                <div className={`events-alert ${scanError.includes('✓') ? 'events-alert-success' : 'events-alert-error'}`}>
+                  {scanError.includes('✓') ? <FiCheckCircle size={18} /> : <FiAlertCircle size={18} />}
+                  {scanError}
+                </div>
+              )}
+              <p className="events-scan-hint">
+                Point your camera at the member's QR code
+              </p>
+              <MotionButton
+                className="events-stop-btn"
+                onClick={stopScanning}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                Stop Scanning
+              </MotionButton>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
 export default EventsManagement;
-
