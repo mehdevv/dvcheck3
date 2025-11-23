@@ -18,7 +18,7 @@ const ProtectedRoute = ({ children, requiredType }) => {
   }
 
   if (!user) {
-    return <Navigate to={requiredType === 'admin' ? '/admin/login' : '/member/login'} replace />;
+    return <Navigate to={requiredType === 'admin' ? '/DV/login' : '/member/login'} replace />;
   }
 
   if (user.type !== requiredType) {

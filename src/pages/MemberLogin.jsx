@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FiUser, FiMail, FiLock, FiAlertCircle } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
@@ -50,7 +50,7 @@ const MemberLogin = () => {
               </div>
               <h2 className="heading-2" style={{ fontSize: 'clamp(1.25rem, 4vw, 1.5rem)' }}>Member Login</h2>
               <p className="text-secondary" style={{ fontSize: 'var(--font-size-sm)' }}>
-                Sign in to access your member dashboard
+                Sign in to access the member dashboard
               </p>
             </div>
 
@@ -63,7 +63,7 @@ const MemberLogin = () => {
                     className="input"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Enter your email"
+                    placeholder="Enter member email"
                     required
                   />
                 </div>
@@ -77,7 +77,7 @@ const MemberLogin = () => {
                     className="input"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Enter your password"
+                    placeholder="Enter password"
                     required
                   />
                 </div>
@@ -101,14 +101,6 @@ const MemberLogin = () => {
               </MotionButton>
             </form>
 
-            <div className="login-footer">
-              <span className="text-secondary" style={{ fontSize: 'var(--font-size-sm)' }}>
-                Admin?{' '}
-              </span>
-              <Link to="/admin/login" className="login-link">
-                Admin Login
-              </Link>
-            </div>
           </div>
         </MotionDiv>
       </div>

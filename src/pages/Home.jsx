@@ -47,7 +47,7 @@ const Home = () => {
               transition={{ duration: 0.6, delay: 0.3 }}
               className="home-buttons"
             >
-              <Link to="/admin/login" className="btn btn-primary home-button">
+              <Link to="/DV/login" className="btn btn-primary home-button">
                 <FiShield size={20} />
                 Admin Login
               </Link>

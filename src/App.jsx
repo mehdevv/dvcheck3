@@ -16,9 +16,9 @@ const AppRoutes = () => {
     <>
       <FirestoreWarning />
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<Navigate to="/member/login" replace />} />
         <Route 
-          path="/admin/login" 
+          path="/DV/login" 
           element={user?.type === 'admin' ? <Navigate to="/admin/dashboard" replace /> : <AdminLogin />} 
         />
         <Route 

@@ -736,14 +736,13 @@
   background: #f9fafb; /* gray-50 */
   border-radius: 12px;
   gap: var(--spacing-sm);
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 
 @media (min-width: 768px) {
   .attendee-item {
     padding: var(--spacing-md);
     gap: var(--spacing-md);
-    flex-wrap: nowrap;
   }
 }
 
@@ -753,6 +752,8 @@
   gap: 4px;
   flex: 1;
   min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .attendee-name {
@@ -762,6 +763,8 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  max-width: 100%;
+  width: 100%;
 }
 
 .attendee-email {
@@ -770,6 +773,8 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  max-width: 100%;
+  width: 100%;
 }
 
 .attendee-time {
@@ -778,6 +783,8 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  max-width: 100%;
+  width: 100%;
 }
 
 .attendee-remove-btn {
