@@ -42,7 +42,7 @@ const FirestoreWarning = () => {
       </p>
       <div style={{ fontSize: '12px', marginBottom: '12px', background: 'rgba(0,0,0,0.2)', padding: '12px', borderRadius: '8px', fontFamily: 'monospace' }}>
         <div style={{ marginBottom: '4px' }}>1. Go to: console.firebase.google.com</div>
-        <div style={{ marginBottom: '4px' }}>2. Select project: dvcheck2-e853b</div>
+        <div style={{ marginBottom: '4px' }}>2. Select project: dvcheck-4ec16</div>
         <div style={{ marginBottom: '4px' }}>3. Firestore Database → Rules tab</div>
         <div>4. Paste rules (see FIREBASE_RULES_COPY_PASTE.txt)</div>
       </div>

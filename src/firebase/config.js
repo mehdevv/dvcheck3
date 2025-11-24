@@ -3,12 +3,12 @@ import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
 const firebaseConfig = {
-  apiKey: "AIzaSyADdIiR9_P1TSl9MWb7WEvyBWV5QfSHBtI",
-  authDomain: "dvcheck2-e853b.firebaseapp.com",
-  projectId: "dvcheck2-e853b",
-  storageBucket: "dvcheck2-e853b.firebasestorage.app",
-  messagingSenderId: "945070098236",
-  appId: "1:945070098236:web:d5705c2bdabb90127e0039"
+  apiKey: "AIzaSyB8u4N_VYJocJX0nK4m2ONGF0c_Mq2jntY",
+  authDomain: "dvcheck-4ec16.firebaseapp.com",
+  projectId: "dvcheck-4ec16",
+  storageBucket: "dvcheck-4ec16.firebasestorage.app",
+  messagingSenderId: "122762821054",
+  appId: "1:122762821054:web:c2db684d31ae9ef9c60def"
 };
 
 // Initialize Firebase
