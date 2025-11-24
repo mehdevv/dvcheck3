@@ -166,3 +166,58 @@
 .modal-footer-actions .btn {
   flex: 1;
 }
+
+/* Modal Header and Close Button */
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+  padding-bottom: var(--spacing-md);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.modal-header .icon-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  border: none;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  color: #6b7280;
+  flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.modal-header .icon-btn:hover {
+  background: #f3f4f6;
+  color: #000;
+}
+
+.modal-header .icon-btn:active {
+  background: #e5e7eb;
+  transform: scale(0.95);
+}
+
+.modal-header .icon-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (min-width: 768px) {
+  .modal-header {
+    margin-bottom: var(--spacing-xl);
+    padding-bottom: var(--spacing-lg);
+  }
+  
+  .modal-header .icon-btn {
+    width: 44px;
+    height: 44px;
+  }
+}

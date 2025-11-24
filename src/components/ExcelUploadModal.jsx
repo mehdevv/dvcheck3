@@ -223,13 +223,17 @@ const ExcelUploadModal = ({ isOpen, onClose }) => {
                     id="excel-upload-input"
                   />
                   <MotionButton
-                    as="label"
-                    htmlFor="excel-upload-input"
+                    type="button"
                     className="btn btn-primary"
-                    style={{ cursor: 'pointer', width: '100%' }}
+                    style={{ width: '100%', cursor: isUploading ? 'not-allowed' : 'pointer' }}
                     disabled={isUploading}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
+                    onClick={() => {
+                      if (!isUploading && fileInputRef.current) {
+                        fileInputRef.current.click();
+                      }
+                    }}
+                    whileHover={{ scale: isUploading ? 1 : 1.02 }}
+                    whileTap={{ scale: isUploading ? 1 : 0.98 }}
                   >
                     <FiUpload size={18} />
                     {isUploading ? 'Processing...' : 'Upload Excel File'}
