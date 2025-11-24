@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FiUser, FiMail, FiLock, FiAlertCircle } from 'react-icons/fi';
+import { FiMail, FiLock, FiAlertCircle } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
 import './Login.css';
 
@@ -44,10 +44,19 @@ const MemberLogin = () => {
           transition={{ duration: 0.5 }}
         >
           <div className="card login-card">
+            <MotionDiv
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              style={{ marginBottom: 'var(--spacing-lg)', textAlign: 'center' }}
+            >
+              <img 
+                src="/DVscan.png" 
+                alt="DVcheck Logo" 
+                className="login-logo"
+              />
+            </MotionDiv>
             <div className="login-header">
-              <div className="login-icon">
-                <FiUser size={20} color="#007AFF" />
-              </div>
               <h2 className="heading-2" style={{ fontSize: 'clamp(1.25rem, 4vw, 1.5rem)' }}>Member Login</h2>
               <p className="text-secondary" style={{ fontSize: 'var(--font-size-sm)' }}>
                 Sign in to access the member dashboard

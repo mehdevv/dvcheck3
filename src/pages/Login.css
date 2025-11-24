@@ -63,6 +63,21 @@
   }
 }
 
+.login-logo {
+  width: 60px;
+  height: 60px;
+  margin: 0 auto;
+  display: block;
+  object-fit: contain;
+}
+
+@media (min-width: 768px) {
+  .login-logo {
+    width: 80px;
+    height: 80px;
+  }
+}
+
 .login-icon {
   width: 40px;
   height: 40px;
